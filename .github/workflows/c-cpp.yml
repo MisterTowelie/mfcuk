@@ -1,0 +1,45 @@
+name: build linux
+
+on:
+  push:
+    branches: [ "pr-1" ]
+    paths-ignore:
+      - 'README*'
+      - '.github/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: install dependencies (Ubuntu)
+      run: sudo apt-get install libnfc-dev libnfc-bin libnfc-examples
+        
+    - name: autoreconf
+      run: autoreconf -is
+      
+    - name: configure
+      run: ./configure
+
+    - name: make
+      run: make
+
+    - name: make check
+      run: make check
+      
+    - name: output files (
+      run: |
+          mkdir src/out
+          cp src/mfcuk src/out
+    
+    - name: Upload debug artifact
+      uses: actions/upload-artifact@v4
+      with:
+          name: mfcuk_debug_ikspress
+          path: src/out
